@@ -257,7 +257,9 @@
     box-shadow: 0 8px 22px rgba(122, 40, 70, .14);
     display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; text-align: center;
   }
-  .face.front { color: #fff; }
+  .face.front { color: #fff; transform: rotateY(0deg); }
+  .dest-inner { cursor: pointer; }
+  .dest-inner:focus-visible, .pc-inner:focus-visible { outline: 3px solid var(--accent); outline-offset: 4px; border-radius: 16px; }
   .face.front .flag { font-size: 38px; }
   .face.front .name { font-family: "Playfair Display", serif; font-size: 21px; font-weight: 600; }
   .face.front .tap { font-size: 11px; letter-spacing: .16em; text-transform: uppercase; opacity: .85; }
@@ -316,6 +318,7 @@
     backface-visibility: hidden; -webkit-backface-visibility: hidden;
   }
   .pc-front {
+    transform: rotateY(0deg);
     min-height: 240px; padding: 22px; color: #fff; position: relative; overflow: hidden;
     background: linear-gradient(180deg, #f6a57a 0%, #e0526f 55%, #6b2d5c 100%);
     display: flex; flex-direction: column; justify-content: flex-end;
@@ -443,22 +446,22 @@
     <h2>Where should we go first?</h2>
     <p class="sub">Four places, one travel partner. Tap a card to see what I have planned.</p>
     <div class="dests" id="dests">
-      <div class="dest" data-dest="Spain"><button class="dest-inner" aria-label="Spain">
+      <div class="dest" data-dest="Spain"><div class="dest-inner" role="button" tabindex="0" aria-label="Spain">
         <div class="face front d-spain"><div class="flag">💃</div><div class="name">Spain</div><div class="tap">Tap to open</div></div>
         <div class="face back"><b>Spain</b>Tapas at midnight, getting lost in Barcelona on purpose.</div>
-      </button></div>
-      <div class="dest" data-dest="France"><button class="dest-inner" aria-label="France">
+      </div></div>
+      <div class="dest" data-dest="France"><div class="dest-inner" role="button" tabindex="0" aria-label="France">
         <div class="face front d-france"><div class="flag">🥐</div><div class="name">France</div><div class="tap">Tap to open</div></div>
         <div class="face back"><b>France</b>Paris at golden hour. I'll carry the croissants.</div>
-      </button></div>
-      <div class="dest" data-dest="Scandinavia"><button class="dest-inner" aria-label="Scandinavia">
+      </div></div>
+      <div class="dest" data-dest="Scandinavia"><div class="dest-inner" role="button" tabindex="0" aria-label="Scandinavia">
         <div class="face front d-scand"><div class="flag">🌌</div><div class="name">Scandinavia</div><div class="tap">Tap to open</div></div>
         <div class="face back"><b>Scandinavia</b>Northern lights, a cabin, and you stealing the blanket.</div>
-      </button></div>
-      <div class="dest" data-dest="China"><button class="dest-inner" aria-label="China">
+      </div></div>
+      <div class="dest" data-dest="China"><div class="dest-inner" role="button" tabindex="0" aria-label="China">
         <div class="face front d-china"><div class="flag">🏮</div><div class="name">China</div><div class="tap">Tap to open</div></div>
         <div class="face back"><b>China</b>Lanterns, dumplings, and the Great Wall, hand in hand.</div>
-      </button></div>
+      </div></div>
     </div>
     <p class="hint" id="destHint">Open all four. There's no wrong answer.</p>
     <button class="btn" id="next4" disabled>Get my passport →</button>
@@ -550,7 +553,7 @@
     a.classList.remove('show');
     a.textContent = b.dataset.seat === 'window'
       ? 'Perfect. You get the view, I get to look at you.'
-      : "Aisle? Fine, I'll take the window. You still get the view, I get to look at you.";
+      : "Nice try. You're getting the window. You get the view, I get to look at you.";
     requestAnimationFrame(() => requestAnimationFrame(() => a.classList.add('show')));
     document.getElementById('next1').disabled = false;
   });
@@ -659,12 +662,15 @@
     'Just one left. Save the best for last?',
     'All four? Good answer. We\'ll need a lot more vacation days.'
   ];
-  document.querySelectorAll('.dest').forEach(d => d.querySelector('.dest-inner').onclick = () => {
-    d.classList.toggle('flipped');
-    seen.add(d.dataset.dest);
-    const h = document.getElementById('destHint');
-    h.textContent = hints[seen.size];
-    if (seen.size === 4) document.getElementById('next4').disabled = false;
+  document.querySelectorAll('.dest').forEach(d => {
+    const inner = d.querySelector('.dest-inner');
+    inner.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); inner.click(); } };
+    inner.onclick = () => {
+      d.classList.toggle('flipped');
+      seen.add(d.dataset.dest);
+      document.getElementById('destHint').textContent = hints[seen.size];
+      if (seen.size === 4) document.getElementById('next4').disabled = false;
+    };
   });
 
   // STAGE 5
