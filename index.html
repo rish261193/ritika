@@ -275,6 +275,21 @@
   .d-china { background: linear-gradient(150deg, #b8232f, #e8a33d); }
   .hint { text-align: center; color: var(--muted); font-size: 15px; min-height: 22px; transition: opacity .3s ease; }
 
+  /* ---------- Reply via WhatsApp ---------- */
+  .reply { display: none; flex-direction: column; gap: 10px; align-items: stretch; margin-top: 8px; }
+  .reply.show { display: flex; animation: stageIn .8s ease both; }
+  .reply h3 { text-align: center; font-size: 20px; }
+  .reply .sub { margin: 0 0 4px; }
+  .reply-opt {
+    display: block; text-decoration: none; text-align: left;
+    background: var(--paper); color: var(--ink);
+    border: 2px solid var(--line); border-radius: var(--radius);
+    padding: 14px 16px; font-size: 15px; line-height: 1.4;
+    box-shadow: var(--shadow); transition: transform .2s ease, border-color .2s ease;
+  }
+  .reply-opt:hover, .reply-opt:focus-visible { transform: translateY(-2px); border-color: var(--accent); }
+  .reply-opt small { display: block; color: var(--muted); font-size: 12px; margin-top: 4px; }
+
   /* ---------- Stage 5: passport + postcard ---------- */
   .passport {
     background: linear-gradient(160deg, #7a1f3d, #52142a); color: #f6dfb0;
@@ -478,7 +493,9 @@
         <div class="photo">🌸</div>
         <div class="fields">
           <div class="field"><label>Holder</label><div>Kritika Jain</div></div>
+          <div class="field"><label>Also known as</label><div>Chulbul</div></div>
           <div class="field"><label>Status</label><div>My favourite person</div></div>
+          <div class="field"><label>Authority</label><div>The only one allowed to boss me around</div></div>
           <div class="field"><label>Valid</label><div>For a lifetime</div></div>
         </div>
         <div class="stamp" id="stamp"><strong>VISA APPROVED</strong><small>LIFETIME VALIDITY</small></div>
@@ -499,7 +516,7 @@
           <div class="note">
             <p>Kritika,</p>
             <p>You became my best friend, and somewhere along the way I realized I want to build a whole life with you.</p>
-            <p>Being around you feels like magic. I missed that feeling today, so I made you this.</p>
+            <p>Seeing your face first thing in the morning makes my whole day. I wanted to give you a little of that back, so I made you this.</p>
             <p>Here's to every place we'll go, together.</p>
             <p class="sig">Rishabh</p>
           </div>
@@ -513,6 +530,14 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div class="reply" id="reply">
+      <h3>Send me a postcard back, Chulbul?</h3>
+      <p class="sub">Pick one. It opens WhatsApp, ready to send.</p>
+      <a class="reply-opt" data-msg="Mein mukka maar dungi 👊 …okay fine, I love it."></a>
+      <a class="reply-opt" data-msg="Window seat, always. Now book the flight. ✈️ I miss you too."></a>
+      <a class="reply-opt" data-msg="Lifetime validity: accepted. Come here already. ❤️"></a>
     </div>
   </section>
 </main>
@@ -588,7 +613,10 @@
       document.getElementById('packCount').textContent = packed + ' / ' + items.length;
       showQuip(it.quip);
       if (packed === items.length - 1) itemsEl.querySelector('.heart').classList.remove('locked');
-      if (packed === items.length) document.getElementById('next2').disabled = false;
+      if (packed === items.length) {
+        document.getElementById('next2').disabled = false;
+        setTimeout(() => showQuip('Security check: no ego found. We never packed one.'), 2600);
+      }
     };
     itemsEl.appendChild(b);
   });
@@ -688,6 +716,32 @@
   const flipPc = () => document.getElementById('postcard').classList.toggle('flipped');
   pcInner.onclick = flipPc;
   pcInner.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); flipPc(); } };
+
+  // REPLY VIA WHATSAPP
+  // Your number in international format, digits only (no +, spaces or dashes). Canada: 1 + 10 digits.
+  const WHATSAPP_NUMBER = '17052577070';
+  document.querySelectorAll('.reply-opt').forEach(a => {
+    const msg = a.dataset.msg;
+    a.textContent = msg;
+    const tip = document.createElement('small');
+    tip.textContent = 'Tap to send →';
+    a.appendChild(tip);
+    a.href = 'https://wa.me/' + WHATSAPP_NUMBER + '?text=' + encodeURIComponent(msg);
+    a.target = '_blank';
+    a.rel = 'noopener';
+  });
+  let replyShown = false;
+  const showReply = () => {
+    if (replyShown) return;
+    replyShown = true;
+    setTimeout(() => {
+      const r = document.getElementById('reply');
+      r.classList.add('show');
+      setTimeout(() => r.scrollIntoView({ behavior: 'smooth', block: 'end' }), 200);
+    }, 2500);
+  };
+  pcInner.addEventListener('click', showReply);
+  pcInner.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') showReply(); });
 </script>
 </body>
 </html>
